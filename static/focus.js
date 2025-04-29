@@ -5,8 +5,8 @@ const API = {
     buhForms: "/api3/buh",
 };
 
-function run() {
-    sendRequest(API.organizationList, (orgOgrns) => {
+async function run() {
+    await sendRequest(API.organizationList, (orgOgrns) => {
         const ogrns = orgOgrns.join(",");
         sendRequest(`${API.orgReqs}?ogrn=${ogrns}`, (requisites) => {
             const orgsMap = reqsToMap(requisites);
@@ -23,19 +23,21 @@ function run() {
 
 run();
 
-function sendRequest(url, callback) {
-    const xhr = new XMLHttpRequest();
-    xhr.open("GET", url, true);
+async function sendRequest(url, callback) {
+    return new Promise(function(resolve, reject) {
+        const xhr = new XMLHttpRequest();
+        xhr.open("GET", url, true);
 
-    xhr.onreadystatechange = function () {
-        if (xhr.readyState === XMLHttpRequest.DONE) {
-            if (xhr.status === 200) {
-                callback(JSON.parse(xhr.response));
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState === XMLHttpRequest.DONE) {
+                if (xhr.status === 200) {
+                    callback(JSON.parse(xhr.response));
+                }
             }
-        }
-    };
+        };
 
-    xhr.send();
+        xhr.send();
+     });
 }
 
 function reqsToMap(requisites) {
