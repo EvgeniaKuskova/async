@@ -6,26 +6,24 @@ const API = {
 };
 
 async function run() {
-    try {
-        const orgOgrns = await sendRequest(API.organizationList);
-        const ogrns = orgOgrns.join(",");
-        const [requisites, analytics] = await Promise.all([
-            sendRequest(`${API.orgReqs}?ogrn=${ogrns}`),
-            sendRequest(`${API.analytics}?ogrn=${ogrns}`)
-        ]);
-        const orgsMap = reqsToMap(requisites);
-        addInOrgsMap(orgsMap, analytics, "analytics");
-        const buh = await sendRequest(`${API.buhForms}?ogrn=${ogrns}`);
-        addInOrgsMap(orgsMap, buh, "buhForms");
-        render(orgsMap, orgOgrns);
-    } catch (error) {
-        console.error("Ошибка при выполнении запросов:", error);
-    }
+    const orgOgrns = await sendRequest(API.organizationList);
+    const ogrns = orgOgrns.join(",");
+
+    const requisites = await sendRequest(`${API.orgReqs}?ogrn=${ogrns}`);
+    const orgsMap = reqsToMap(requisites);
+
+    const analytics = await sendRequest(`${API.analytics}?ogrn=${ogrns}`);
+    addInOrgsMap(orgsMap, analytics, "analytics");
+
+    const buh = await sendRequest(`${API.buhForms}?ogrn=${ogrns}`);
+    addInOrgsMap(orgsMap, buh, "buhForms");
+
+    render(orgsMap, orgOgrns);
 }
 
 run();
 
-async function sendRequest(url) {
+async function sendRequest(url, callback) {
     return new Promise(function(resolve, reject) {
         const xhr = new XMLHttpRequest();
         xhr.open("GET", url, true);
