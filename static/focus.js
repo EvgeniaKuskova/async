@@ -24,9 +24,7 @@ async function run() {
 run();
 
 async function sendRequest(url) {
-    return new Promise(function(resolve, reject) {
-        fetch(url).then(response => resolve(response.json())).then(reject);
-     });
+    return fetch(url).then(response =>response.json());
 }
 
 function reqsToMap(requisites) {
