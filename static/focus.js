@@ -6,24 +6,26 @@ const API = {
 };
 
 async function run() {
-    await sendRequest(API.organizationList, (orgOgrns) => {
+    try {
+        const orgOgrns = await sendRequest(API.organizationList);
         const ogrns = orgOgrns.join(",");
-        sendRequest(`${API.orgReqs}?ogrn=${ogrns}`, (requisites) => {
-            const orgsMap = reqsToMap(requisites);
-            sendRequest(`${API.analytics}?ogrn=${ogrns}`, (analytics) => {
-                addInOrgsMap(orgsMap, analytics, "analytics");
-                sendRequest(`${API.buhForms}?ogrn=${ogrns}`, (buh) => {
-                    addInOrgsMap(orgsMap, buh, "buhForms");
-                    render(orgsMap, orgOgrns);
-                });
-            });
-        });
-    });
+        const [requisites, analytics] = await Promise.all([
+            sendRequest(`${API.orgReqs}?ogrn=${ogrns}`),
+            sendRequest(`${API.analytics}?ogrn=${ogrns}`)
+        ]);
+        const orgsMap = reqsToMap(requisites);
+        addInOrgsMap(orgsMap, analytics, "analytics");
+        const buh = await sendRequest(`${API.buhForms}?ogrn=${ogrns}`);
+        addInOrgsMap(orgsMap, buh, "buhForms");
+        render(orgsMap, orgOgrns);
+    } catch (error) {
+        console.error("Ошибка при выполнении запросов:", error);
+    }
 }
 
 run();
 
-async function sendRequest(url, callback) {
+async function sendRequest(url) {
     return new Promise(function(resolve, reject) {
         const xhr = new XMLHttpRequest();
         xhr.open("GET", url, true);
@@ -31,7 +33,7 @@ async function sendRequest(url, callback) {
         xhr.onreadystatechange = function () {
             if (xhr.readyState === XMLHttpRequest.DONE) {
                 if (xhr.status === 200) {
-                    callback(JSON.parse(xhr.response));
+                    resolve(JSON.parse(xhr.response));
                 }
             }
         };
