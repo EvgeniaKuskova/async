@@ -25,18 +25,7 @@ run();
 
 async function sendRequest(url, callback) {
     return new Promise(function(resolve, reject) {
-        const xhr = new XMLHttpRequest();
-        xhr.open("GET", url, true);
-
-        xhr.onreadystatechange = function () {
-            if (xhr.readyState === XMLHttpRequest.DONE) {
-                if (xhr.status === 200) {
-                    resolve(JSON.parse(xhr.response));
-                }
-            }
-        };
-
-        xhr.send();
+        fetch(url).then(response => resolve(response.json()));
      });
 }
 
