@@ -1,6 +1,6 @@
 const API = {
     organizationList: "/orgsList",
-    analytics: "/api3/analytics",
+    analytics: "/api3/analtics",
     orgReqs: "/api3/reqBase",
     buhForms: "/api3/buh",
 };
@@ -24,7 +24,15 @@ async function run() {
 run();
 
 async function sendRequest(url) {
-    return fetch(url).then(response =>response.json());
+    const response = await fetch(url);
+
+    if (!response.ok) {
+        alert(`Код: ${response.status} \nСтатус: ${response.statusText}`);
+    }
+    else {
+        return response.json();
+    }
+
 }
 
 function reqsToMap(requisites) {
